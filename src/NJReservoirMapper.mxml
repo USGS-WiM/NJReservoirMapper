@@ -310,7 +310,7 @@
 								<s:VGroup paddingTop="5" paddingLeft="5" paddingBottom="10">
 									<s:VGroup id="layerToggles" paddingTop="5" paddingLeft="10">
 										<!--<s:Button label="Get Reservoir Summary" color="black" click="getSummaryTables(event)" enabled="{reservoirsToggle.selected}"/>-->
-										<wimControls:LayerToggle id="reservoirsToggle" serviceLayerID="reservoirGraphicsLayer" layerTitle="Reservoirs"	selected="{reservoirGraphicsLayer.visible}" creationComplete="{reservoirsToggle.selected = false}" />
+										<wimControls:LayerToggle id="reservoirsToggle" serviceLayerID="reservoirGraphicsLayer" layerTitle="Reservoirss"	selected="{reservoirGraphicsLayer.visible}" creationComplete="{reservoirsToggle.selected = false}" />
 										<wimControls:LayerToggle id="streamGagesToggle" serviceLayerID="streamGageGraphicsLayer" layerTitle="Selected stream gages" selected="{streamGageGraphicsLayer.visible}" creationComplete="{streamGagesToggle.selected = false}" />
 										<wimControls:LayerToggle id="nwsRadarToggle" serviceLayerID="nwsRadar" layerTitle="National weather service radar" selected="{nwsRadar.visible}" />
 										<wimControls:LayerToggle id="nwsWatchesWarningsToggle" serviceLayerID="nwsWatchesWarnings" layerTitle="Flood watches/warnings" selected="{nwsWatchesWarnings.visible}" />	
