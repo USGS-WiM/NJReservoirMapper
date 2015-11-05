@@ -1,0 +1,7 @@
+bin-debug
+bin-release/srcview
+bin-release/web.config
+.project
+.flexProperties
+.actionScriptProperties
+.settings/org.eclipse.core.resources.prefs
