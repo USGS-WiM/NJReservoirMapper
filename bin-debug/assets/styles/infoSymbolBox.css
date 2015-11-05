@@ -1,0 +1,25 @@
+/* CSS file */
+
+.InfoCloseButton {                        
+	disabledSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_closeButtonDisabledSkin");                        
+	downSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_closeButtonDownSkin");                        
+	overSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_closeButtonOverSkin");                        
+	upSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_closeButtonUpSkin");
+	position: absolute;
+	top: 2;
+	right: 2;                     
+}                        
+.InfoExpandButton {                        
+	disabledSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_expandButtonDisabledSkin");                        
+	downSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_expandButtonDownSkin");                        
+	overSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_expandButtonOverSkin");                        
+	upSkin: Embed(source="./assets/swfs/skins.swf", symbol="Callout_expandButtonUpSkin");                        
+}  
+.line {
+   	text-decoration: underline;
+   	color: blue;
+}
+.noline {
+   	color: black;
+   	text-decoration: none;
+}                     

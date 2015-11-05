@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 12.07.12 - NE - Created. -->
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	
+	<fx:Script>
+		<![CDATA[
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if (data != null && data[column.dataField] != null) {
+					if (data[column.dataField] != 'Null') {
+						lblData.text = data[column.dataField];
+					} else {
+						lblData.text = 'n.a.';
+					}
+					
+					if (data.PORFtNote != 'Null') {
+						superscript.text = data.PORFtNote;
+					} else { 
+						superscript.text = '';
+					} 
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:RichText top="9" left="7" paddingLeft="5">
+		<s:span baselineShift="superscript" id="superscript" fontSize="12" fontWeight="bold"></s:span>
+		<s:span id="lblData"/>
+	</s:RichText>
+	
+</s:GridItemRenderer>

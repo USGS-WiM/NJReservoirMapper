@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			
+			import mx.core.FlexGlobals;
+			
+			
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if (data != null) {
+					lblData.text = data[column.dataField];
+				}
+				
+				if (data != null) {
+					if (data.ResCondition == 'spill') {
+						gridBackColor.color = 0xFF0000;
+						gridBackColor.alpha = 1.0;
+					} else if (data.ResCondition == 'above90') {
+						gridBackColor.color = 0xFFF68F;
+						gridBackColor.alpha = 1.0;
+					} else if (data.ResCondition == 'below90') {
+						gridBackColor.alpha = 0;
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Group height="100%" width="100%">
+		<s:Rect width="100%" height="100%">
+			<s:fill><s:SolidColor id="gridBackColor" alpha="0" /></s:fill>
+		</s:Rect>
+		<s:Label id="lblData" top="9" left="7" bottom="7" width="{this.column.width-10}" color="{((data != null) &amp;&amp; (data.ResLinkType == 1 || data.ResLinkType == 2)) ? 0x0000FF : 0x000000}"  useHandCursor="true" buttonMode="true" mouseChildren="false"/>
+	</s:Group>
+	
+</s:GridItemRenderer>

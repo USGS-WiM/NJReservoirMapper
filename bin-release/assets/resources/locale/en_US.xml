@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!-- 08.07.12 - NE - Updated fswim services to use VIP. -->
+<!-- 05.29.12 - BAD - removed cities and rivers sample service layers. -->
+<!-- 05.25.12 - BAD - URLs added for NWS radar and watches/warnings. -->
+<!-- 02.23.12 - NE - Created. -->
+<!--
+*************************
+ ENGLISH RESOURCES
+************************* 
+ -->
+<resources>
+  <!-- Settings -->
+  
+  <!--  URLs -->
+  <resourceBundle name="urls">
+	 <resource name="nwsRadar" value="http://gis.srh.noaa.gov/ArcGIS/rest/services/RIDGERadar/MapServer"/>
+	 <resource name="nwsWatchesWarnings" value="http://gis.srh.noaa.gov/ArcGIS/rest/services/watchWarn/MapServer"/>
+	 <resource name="streamgagesReservoirs" value="http://50.17.205.92/arcgis/rest/services/NJMapper/reservoirs_downstream_gages/MapServer" />
+  </resourceBundle>
+  
+  <!-- UI graphics -->
+  <resourceBundle name="ui.graphics">
+    <resource name="headerLogo" value="assets/images/usgsLogoSm.jpg" />
+    <resource name="wimLogo" value="assets/images/wim_logo_sm_4c.gif" />  
+    <resource name="njDepLogo" value="assets/images/nj_dep_small.jpg" />
+  </resourceBundle>
+  
+  <!-- UI text -->
+  <resourceBundle name="ui.text">
+  	<!--  Application Titles -->
+    <resource name="mainTitle" value="Template Mapper"/>
+    <resource name="subTitle" value="Beta Version"/>
+    <!-- Component Text -->
+    <resource name="geocodeSearchButtonText" value="Find Location"/>
+    <resource name="geocodeSearchHintText" value="Type Address, Landmark, etc..." />
+  </resourceBundle>
+</resources>

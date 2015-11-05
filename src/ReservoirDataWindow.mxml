@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 08.17.12 - NE - Tweaks to formatting. -->
+<!-- 06.18.12 - NE - Created. -->
+<wim:WiMInfoWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:esri="http://www.esri.com/2008/ags"
+				   xmlns:osmf="http://ns.adobe.com/osmf"
+				   xmlns:wim="gov.usgs.wim.controls.*" 
+				   xmlns:localControls="controls.*"
+				   creationComplete="onCreate()"
+				   minWidth="225">
+	
+	<fx:Style source="assets/styles/main.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import com.esri.ags.FeatureSet;
+			import com.esri.ags.Graphic;
+			import com.esri.ags.geometry.Extent;
+			import com.esri.ags.utils.GraphicUtil;
+			
+			import flash.net.*;
+			
+			import mx.charts.DateTimeAxis;
+			import mx.charts.HitData;
+			import mx.charts.events.ChartItemEvent;
+			import mx.charts.series.LineSeries;
+			import mx.collections.ArrayCollection;
+			import mx.collections.IList;
+			import mx.collections.ItemResponder;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.SliderEvent;
+			import mx.messaging.management.ObjectName;
+			import mx.rpc.AsyncResponder;
+			import mx.rpc.AsyncToken;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			import mx.utils.ArrayUtil;
+			import mx.utils.ObjectProxy;
+			import mx.utils.ObjectUtil;
+			import mx.utils.object_proxy;
+			
+			import spark.events.IndexChangeEvent;
+			//import mx.rpc.http.mxml.HTTPService;
+			
+			/*    protected function componentLoad():void
+			{
+				zoomToFeaturesOnMap.addEventListener(MouseEvent.CLICK, zoomToFeatures);
+				zoomToFeaturesOnMap.visible = true;
+				zoomToFeaturesOnMap.includeInLayout = true;
+			}
+			
+			protected function zoomToFeatures(event):void {
+				var graphicProvider:ArrayCollection = FlexGlobals.topLevelApplication.queryGraphicsLayer.graphicProvider as ArrayCollection;
+				var graphicsExtent:Extent = GraphicUtil.getGraphicsExtent(graphicProvider.toArray());
+				FlexGlobals.topLevelApplication.map.extent = graphicsExtent.expand(3.1);
+			} */
+			
+			private function onCreate():void {
+				if (data != null) {
+					var SiteID:String = data.ResID;
+					dataLink.useHandCursor = true;
+					dataLink.buttonMode = true;
+					dataLink.mouseChildren = false;
+					dataLink.styleName = "line";
+					if (data.ResLinkType == '2') {
+						dataLink.text = "Click for reservoir manager web page with recent values";
+						dataLink.addEventListener(MouseEvent.CLICK, function():void {
+							navigateToURL(new URLRequest('http://www.nyc.gov/html/dep/html/drinking_water/maplevels_wide.shtml'));
+						});
+					} else if (data.ResLinkType == '1') {
+						dataLink.text = "Click for USGS NWIS current conditions";
+						dataLink.addEventListener(MouseEvent.CLICK, function():void {
+							navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+SiteID));
+						});
+					} else if (data.ResLinkType == '0') {
+						dataLink.text = "Click for summary of available information";
+						dataLink.addEventListener(MouseEvent.CLICK, function():void {
+							navigateToURL(new URLRequest("http://wdr.water.usgs.gov/wy"+data.WaterYear+"/pdfs/"+data.ResID+"."+data.WaterYear+".pdf"));
+						});
+					}
+				}
+			}
+			
+			protected function infoFault(info:Object, token:Object = null):void
+			{
+				Alert.show(info.toString());
+			} 
+			
+			private function queryFault(info:Object, token:Object = null):void
+			{
+				Alert.show(info.toString());
+			} 
+			
+		]]>
+	</fx:Script>
+	
+	<mx:VBox id="reservoirInfoBox" color="black" backgroundColor="0xDDDDDD" horizontalScrollPolicy="off" borderStyle="solid"
+			 paddingBottom="10" paddingLeft="5" paddingRight="5" paddingTop="5" width="100%">
+		<s:VGroup>
+			<!-- put in attributes -->
+			<s:VGroup paddingLeft="10">
+				<s:HGroup>
+					<s:Label text="Reservoir name: " fontWeight="bold" />
+					<s:Label text="{data.ResName}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="ID number: " fontWeight="bold" />
+					<s:Label text="{data.ResID}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Current water-surface elevation: " fontWeight="bold" />
+					<s:Label text="{(data.resElevation != 'n.a.') ? data.resElevation + ' ft' : 'N/A'}"/>
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Spillway Elevation: " fontWeight="bold" />
+					<s:Label text="{data.spill_stage} ft" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Basin name: " fontWeight="bold" />
+					<s:Label text="{data.Basin}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Downstream gage: " fontWeight="bold" />
+					<s:Label text="{(data.DownstreamGage != 'N/A') ? data.DownstreamGage : 'N/A'}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Distance to downstream gage: " fontWeight="bold" />
+					<s:Label text="{(data.DownstreamGage != 'N/A' &amp;&amp; data.Dist_dwnStrm_mi != 'N/A') ? data.Dist_dwnStrm_mi + ' mi.' : 'N/A'}" />
+				</s:HGroup>
+				<mx:Label id="dataLink"/>
+			</s:VGroup>
+			<localControls:NWISGraphImage id="nwisGraph" visible="{data.HAS_REALTIME == 1 &amp;&amp; data.resGageHeight != undefined}" includeInLayout="{data.HAS_REALTIME == 1 &amp;&amp; data.resGageHeight != undefined}" graphType="2" siteNumber="{data.ResID}" chartParam="00065" />
+		</s:VGroup>
+	</mx:VBox>
+</wim:WiMInfoWindow>

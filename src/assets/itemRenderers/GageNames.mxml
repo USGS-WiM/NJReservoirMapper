@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			
+			import mx.core.FlexGlobals;
+			
+			var summaryData:Object;
+			
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if (data != null) {
+					summaryData = FlexGlobals.topLevelApplication._summaryWindow.data;
+					if (data[column.dataField] != 'Null') {
+						lblData.setStyle("color", "0x0000FF");
+						lblData.text = data[column.dataField];
+					} else {
+						lblData.setStyle("color", "0x000000");
+						lblData.text = 'n.a.';
+					}
+					
+					
+					if (column.dataField != 'Res_Mngr') {
+						if (data.gageCondition == 'flooding') {
+							gridBackColor.color = 0xFF0000;
+							gridBackColor.alpha = 1.0;
+						} else if (data.gageCondition == 'nearFlood') {
+							gridBackColor.color = 0xFFF68F;
+							gridBackColor.alpha = 1.0;
+							trace(data[column.dataField]);
+						} else if (data.gageCondition == 'normal') {
+							gridBackColor.alpha = 0;
+						}
+				}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Group height="100%" width="100%">
+		<s:Rect width="100%" height="100%">
+			<s:fill><s:SolidColor id="gridBackColor" alpha="0" /></s:fill>
+		</s:Rect>
+		<s:Label id="lblData" top="9" left="7" bottom="7" width="{this.column.width-10}" useHandCursor="true" buttonMode="true" mouseChildren="false"/>
+	</s:Group>
+
+</s:GridItemRenderer>

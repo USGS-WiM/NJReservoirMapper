@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 10.27.12 - NE - created. -->
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			[Bindable]
+			private var SiteID:String;
+			
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if (data != null && data.ResID != null) {
+					//lblData.styleName = 'line';
+					if (column.dataField == 'ResName') {
+						if (data.ResLinkType != 'Null') {
+							lblData.setStyle("color", "0x0000FF");
+							SiteID = data.ResID;
+							lblData.setStyle("fontWeight", "bold");
+							txtData.toolTip = "Click for realtime information";
+							if (data.ResLinkType == 1) {
+								txtData.addEventListener(MouseEvent.CLICK, function():void {
+									navigateToURL(new URLRequest('http://www.nyc.gov/html/dep/html/drinking_water/maplevels_wide.shtml'));
+								});
+							} else if (data.ResLinkType == 0) {
+								txtData.addEventListener(MouseEvent.CLICK, function():void {
+									navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+SiteID));
+								});
+							}
+							lblData.text = data[column.dataField];
+						} else {
+							lblData.text = data[column.dataField];
+						}
+					} else if (column.dataField == 'StreamGageNm' && data[column.dataField] != 'Null') {
+						lblData.setStyle("color", "0x0000FF");
+						lblData.setStyle("fontWeight", "bold");
+						txtData.toolTip = "Click for realtime information";
+						SiteID = data.GageID;
+						if (SiteID == '01424997' || SiteID == '01416900' || SiteID == '01435900') {
+							txtData.addEventListener(MouseEvent.CLICK, function():void {
+								navigateToURL(new URLRequest('http://www.nyc.gov/html/dep/html/drinking_water/maplevels_wide.shtml'));
+							});
+						} else if (SiteID == '01397050') {
+							txtData.addEventListener(MouseEvent.CLICK, function():void {
+								navigateToURL(new URLRequest('http://www.njwsa.org/Data.htm'));
+							});
+						} else {
+							txtData.addEventListener(MouseEvent.CLICK, function():void {
+								navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+SiteID));
+							});
+						}
+						lblData.text = data[column.dataField];
+						if (data.Footnote != 'Null') {
+							superscript.text = data.Footnote;
+						} else { 
+							superscript.text = '';
+						}
+					}
+					//trace('first ' + column.dataField + ' ' + data[column.dataField]);
+				} else if (data != null && data.GageID != null && data.HAS_REALTIME == '1') {
+					//lblData.styleName = 'line';
+					lblData.setStyle("color", "0x0000FF");
+					//lblData.setStyle("text-decoration", "underline");
+					lblData.setStyle("fontWeight", "bold");
+					txtData.toolTip = "Click for realtime information";
+					SiteID = data.GageID;
+					lblData.text = data[column.dataField];
+					txtData.addEventListener(MouseEvent.CLICK, function():void {
+						navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+SiteID));
+					});
+				} else if (data != null && column.dataField == 'GageNm' && data[column.dataField] == 'Null') {
+					//lblData.styleName = 'noline';
+					lblData.setStyle("color", "0x000000");
+					lblData.setStyle("fontWeight", "normal");
+					txtData.toolTip = "No downstream gage";
+					lblData.text = 'n.a.';
+					superscript.text = '';
+					//trace('third ' + column.dataField + ' ' + data[column.dataField]);
+				} else if (data != null) {
+					lblData.setStyle("fontWeight", "normal");
+					lblData.text = data[column.dataField];
+					superscript.text = '';
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:RichText id="txtData" top="9" left="7" bottom="7" width="{this.column.width-10}" useHandCursor="true" buttonMode="true" mouseChildren="false">
+		<s:span id="lblData"></s:span>
+		<s:span baselineShift="superscript" id="superscript" fontSize="12" fontWeight="bold"></s:span>
+	</s:RichText>
+	
+</s:GridItemRenderer>

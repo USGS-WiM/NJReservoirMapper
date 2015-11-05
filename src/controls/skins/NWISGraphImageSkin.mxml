@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 10.03.11 - NE - Adjusted for presentation style graphs. -->
+<!-- 09.01.11 - NE - Adjusted to reflect loadingScreenColor property in NWISGraphImage.mxml. -->
+<!-- 08.09.11 - JB - Created -->
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:wim="gov.usgs.wim.controls.*" 
+		xmlns:mx="library://ns.adobe.com/flex/mx">
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("controls.NWISGraphImage")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			protected function graphLoaded(event:Event):void
+			{
+				graph.width=hostComponent.getGraphWidth(); 
+				graph.height=hostComponent.getGraphHeight(); 
+				graphLoadingScreen.visible = false;
+				
+				graphText.htmlText = hostComponent.getGraphText();
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<s:BorderContainer borderVisible="false" >
+		<mx:Box id="siteChartBox" label="USGS Hydrograph" styleName="siteContain" textAlign="center" paddingLeft="5" paddingRight="5">
+			<mx:Text id="graphText" htmlText="{hostComponent.getGraphText()}" textAlign="left" fontSize="12" toolTip="NWIS waterdata for this site" width="95%" />
+			<s:Group>
+				<mx:Image id="graph" source="{(hostComponent.graphType == 0 || hostComponent.graphType == 1) ? hostComponent.getGraphURL() + '&amp;site_no=' + hostComponent.siteNumber : hostComponent.presentationURL }" complete="graphLoaded(event)" />
+				<wim:BasicLoadingScreen id="graphLoadingScreen" borderVisible="false" color="{hostComponent.loadingScreenColor}" width="{hostComponent.getGraphWidth()}" height="{hostComponent.getGraphHeight()}" visible="true" alpha="0.6" />
+			</s:Group>			
+		</mx:Box>
+	</s:BorderContainer>
+</s:Skin>

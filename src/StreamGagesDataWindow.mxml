@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 08.17.12 - NE - Added NWISGraph as local component. -->
+<!-- 08.17.12 - NE - Tweaks to formatting. -->
+<!-- 06.18.12- NE - Created. -->
+<wim:WiMInfoWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:esri="http://www.esri.com/2008/ags"
+				   xmlns:osmf="http://ns.adobe.com/osmf"
+				   xmlns:wim="gov.usgs.wim.controls.*" 
+				   xmlns:localControls="controls.*"
+				   minWidth="225">
+	
+	<fx:Style source="assets/styles/main.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import com.esri.ags.FeatureSet;
+			import com.esri.ags.Graphic;
+			import com.esri.ags.geometry.Extent;
+			import com.esri.ags.utils.GraphicUtil;
+			
+			import flash.net.*;
+			
+			import mx.charts.DateTimeAxis;
+			import mx.charts.HitData;
+			import mx.charts.events.ChartItemEvent;
+			import mx.charts.series.LineSeries;
+			import mx.collections.ArrayCollection;
+			import mx.collections.IList;
+			import mx.collections.ItemResponder;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.SliderEvent;
+			import mx.messaging.management.ObjectName;
+			import mx.rpc.AsyncResponder;
+			import mx.rpc.AsyncToken;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			import mx.utils.ArrayUtil;
+			import mx.utils.ObjectProxy;
+			import mx.utils.ObjectUtil;
+			import mx.utils.object_proxy;
+			
+			
+			
+			import spark.events.IndexChangeEvent;
+			//import mx.rpc.http.mxml.HTTPService;
+			
+			/*    protected function componentLoad():void
+			{
+			zoomToFeaturesOnMap.addEventListener(MouseEvent.CLICK, zoomToFeatures);
+			zoomToFeaturesOnMap.visible = true;
+			zoomToFeaturesOnMap.includeInLayout = true;
+			}
+			
+			protected function zoomToFeatures(event):void {
+			var graphicProvider:ArrayCollection = FlexGlobals.topLevelApplication.queryGraphicsLayer.graphicProvider as ArrayCollection;
+			var graphicsExtent:Extent = GraphicUtil.getGraphicsExtent(graphicProvider.toArray());
+			FlexGlobals.topLevelApplication.map.extent = graphicsExtent.expand(3.1);
+			} */
+			
+			protected function infoFault(info:Object, token:Object = null):void
+			{
+				Alert.show(info.toString());
+			} 
+			
+			private function queryFault(info:Object, token:Object = null):void
+			{
+				Alert.show(info.toString());
+			} 
+			
+		]]>
+	</fx:Script>
+	
+	<mx:VBox id="streamGageInfoBox" color="black" backgroundColor="0xDDDDDD" horizontalScrollPolicy="off" borderStyle="solid"
+			 paddingBottom="10" paddingLeft="5" paddingRight="5" paddingTop="5" width="100%">
+		<s:VGroup>
+			<!-- put in attributes -->
+			<s:VGroup paddingLeft="10">
+				<s:HGroup>
+					<s:Label text="Gage name: " fontWeight="bold" />
+					<s:Label text="{data.StreamGageNm}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Gage ID number: " fontWeight="bold" />
+					<s:Label text="{data.GageID}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Current stage: " fontWeight="bold" />
+					<s:Label text="{(data.gageGageHeight != undefined) ? data.gageGageHeight + ' ft' : 'N/A'}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Flood stage: " fontWeight="bold" />
+					<s:Label text="{(data.FloodStage != 'N/A') ? data.FloodStage + ' ft' : 'N/A'}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Next upstream reservoir: " fontWeight="bold" />
+					<s:Label text="{data.NearestRes}" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Drainage area: " fontWeight="bold" />
+					<s:Label text="{data.GageDrnAr} sq. mi" />
+				</s:HGroup>
+				<s:HGroup>
+					<s:Label text="Basin name: " fontWeight="bold" />
+					<s:Label text="{data.streamBasin}" />
+				</s:HGroup>
+				<mx:Label text="Click for USGS NWIS current conditions" styleName="line" useHandCursor="true" buttonMode="true" mouseChildren="false" click="navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+data.GageID))" />
+			</s:VGroup>
+		</s:VGroup>
+		<localControls:NWISGraphImage id="nwisGraph" visible="{data.HAS_REALTIME == 1 &amp;&amp; data.gageGageHeight != undefined}" includeInLayout="{data.HAS_REALTIME == 1 &amp;&amp; data.gageGageHeight != 'undefined'}" graphType="2" siteNumber="{data.GageID}" chartParam="00065" />
+	</mx:VBox>
+</wim:WiMInfoWindow>

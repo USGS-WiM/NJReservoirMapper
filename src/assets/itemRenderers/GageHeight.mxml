@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 10.27.12 - NE - created. -->
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	
+	<fx:Script>
+		<![CDATA[
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if (data != null) {
+				 	if (data.gageCondition == 'flooding') {
+						gridBackColor.color = 0xFF0000;
+						gridBackColor.alpha = 1.0;
+						lblData.setStyle("fontWeight", "bold");
+						//lblData.setStyle("color", 0xFF0000);
+					} else if (data.gageCondition == 'nearFlood') {
+						gridBackColor.color = 0xFFF68F;
+						gridBackColor.alpha = 1.0;
+						lblData.setStyle("fontWeight", "bold");
+					} else if (data.gageCondition == 'normal') {
+						gridBackColor.alpha = 0;
+						lblData.setStyle("fontWeight", "normal");
+					}
+					lblData.text = data[column.dataField]; 
+				} /* else if (data != null && data.DwnStreamGageID != null && column.dataField == 'DownstreamGage' && data.StreamGageNm != 'n.a.' && data[column.dataField] != 'Null') {
+					if (data.gageGageHeight >= data.FloodStage) {
+						gridBackColor.color = 0xFF0000;
+						gridBackColor.alpha = 1.0;
+						lblData.setStyle("fontWeight", "bold");
+						//lblData.setStyle("color", 0xFF0000);
+					} else if (data.gageGageHeight >= data.FloodStage-0.99999) {
+						gridBackColor.color = 0xFFF68F;
+						gridBackColor.alpha = 1.0;
+						lblData.setStyle("fontWeight", "bold");
+					} else {
+						gridBackColor.alpha = 0;
+						lblData.setStyle("fontWeight", "normal");
+					}
+					if (data[column.dataField] == 'Null') {
+						lblData.text = 'n.a.';
+					} else {
+						lblData.text = data[column.dataField]; 
+					}
+				} else if (data != null && data.GageID != null && (data[column.dataField] != 'Null' && data.StreamGageNm != 'Null' && data[column.dataField] != 'n.a.')) {
+					if (data.gageGageHeight >= data.FloodStage) {
+						gridBackColor.color = 0xFF0000;
+						gridBackColor.alpha = 1.0;
+						lblData.setStyle("fontWeight", "bold");
+						//lblData.setStyle("color", 0xFF0000);
+					} else if (data.gageGageHeight >= data.FloodStage-1) {
+						gridBackColor.color = 0xFFF68F;
+						gridBackColor.alpha = 1.0;
+						lblData.setStyle("fontWeight", "bold");
+					} else {
+						gridBackColor.alpha = 0;
+						lblData.setStyle("fontWeight", "normal");
+					}
+					lblData.text = data[column.dataField];
+				} else if (data != null && (data[column.dataField] != 'Null' || data[column.dataField] != 'n.a.') && data.StreamGageNm != 'Null') {
+					lblData.text = data[column.dataField];
+				}
+				trace('lbl: ' + lblData.text + '/n'); */
+			}
+		]]>
+	</fx:Script>
+	<s:Group height="100%" width="100%">
+		<s:Rect width="100%" height="100%">
+			<s:fill><s:SolidColor id="gridBackColor" alpha="0" /></s:fill>
+		</s:Rect>
+		<s:Label id="lblData" top="9" left="7" width="{this.width-10}" />
+	</s:Group>
+		
+</s:GridItemRenderer>
