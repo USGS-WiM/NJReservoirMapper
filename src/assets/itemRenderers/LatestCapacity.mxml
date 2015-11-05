@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 12.07.12 - NE - Created. -->
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	
+	<fx:Script>
+		<![CDATA[
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if (data != null && data.hasOwnProperty("resLatestCapacity") && data[column.dataField] != 'n.a.') {
+					lblData.text = data[column.dataField];
+					if (data.LateVolFtNt != 'Null') {
+						superscript.text = data.LateVolFtNt;
+					} else { 
+						superscript.text = '';
+					} 
+				} else if (data != null && data.hasOwnProperty("resUsableCapacity") && data.resUsableCapacity != 'n.a.') {
+					lblData.text = data.resUsableCapacity;
+					if (data.LateVolFtNt != 'Null') {
+						superscript.text = data.LateVolFtNt;
+					} else {
+						superscript.text = '';
+					} 
+				} else {
+					if (data != null) {
+						lblData.text = 'n.a.';
+						superscript.text = '';
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:RichText top="9" left="7" paddingLeft="5">
+		<s:span baselineShift="superscript" id="superscript" fontSize="12" fontWeight="bold"></s:span>
+		<s:span id="lblData"/>
+	</s:RichText>
+	
+</s:GridItemRenderer>

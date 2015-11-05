@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 04.30.13 - NE - Updated to local mapservicelegend control. -->
+<!-- 12.10.12 - NE - Updates to reservoir and streamgage popups. -->
+<!-- 11.30.12 - NE - Added Available Tables tab with links directly to reservoir and streamgage tables. -->
+<!-- 09.05.12 - NE - Removed WiM logo. -->
+<!-- 09.05.12 - NE - Updated handling for reservoir symbols. Updated legends for reservoirs and stream gages. Initial implementation of summary table. -->
+<!-- 08.20.12 - NE - Updated reservoir symbols. -->
+<!-- 08.20.12 - NE - Updates to formatting of layer list and toggles. -->
+<!-- 08.14.12 - NE - Updated with graphics layers for reservoirs and streamgages in order to control symbology more efficiently. -->
+<!-- 08.09.12 - BAD - added legends for reservoirs and streamgages."legendTitle" property value left blank in order to prevent display of layer name from the mxd. -->
+<!-- 08.06.12 - BAD - changed layer definition for nwsWatchesWarnings layer, set legend filter to match, and renamed legend to match layer toggle name. -->
+<!-- 08.02.12 - BAD - added info window (WiMInfoWindow) for click event on each site type -->
+<!-- 07.31.12 - BAD - added readable error to geocoder when input field is left blank or hint is left as input --> 
+<!-- 07.23.12 - BAD - added layers for reservoirs and stream gages, including individual toggles -->
+<!-- 05.29.12 - BAD - removed cities and rivers layers, redefined NWS layers to only include flood-related warnings -->
+<!-- 05.25.12 - BAD - Added NWS watches/warnings layers.-->
+<!-- 05.25.12 - BAD - Removed header and repositioned slider. -->
+<!-- 05.25.12 - BAD - Changed extent to NJ -->
+<!-- 02.23.12 - NE - Updated to use resources and dynamic MapServiceLegend component in WiM library. -->
+<!-- 02.23.12 - NE - Updated layer/legend box with newer LayerToggles and dynamic legend for layers. -->
+<!-- 04.01.11 - JB - Added AS side logic for right-click and mousewheel -->
+<!-- 03.14.11 - NE - Updated to include many WiM controls.  Base map selector, full screen button, collapsing search for geocoder, history. -->
+<!-- 03.28.11 - JB - Template clean-up and updates -->
+<!-- 12.13.10 - NE - Updated extent navigator location.  changed cursor to standard arrow. -->
+<!-- 12.06.10 - JB - Updated Well-Known ID. -->
+<!-- 07.28.10 - JB - updated geocode tag for 2.0 -->
+<!-- 06.28.10 - JB - Added new Wim LayerLegend component -->
+<!-- 05.25.10 - JB - Cleared FWS references from print template -->
+<!-- 03.26.10 - JB - Initial template creation. -->
+<mx:Application
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:esri="http://www.esri.com/2008/ags"
+	xmlns:wimControls="gov.usgs.wim.controls.*"
+	xmlns:localControls="controls.*"
+	xmlns:navigationClasses="com.esri.ags.controls.navigationClasses.*"
+ 	creationComplete="setup()"
+    pageTitle="NJ Reservoir Mapper" 
+    layout="absolute" >
+    
+    <fx:Style source="assets/styles/main.css"/>
+	
+	<fx:Script source="NJReservoirMapper.as" />
+    	
+	<fx:Declarations>
+		
+		<esri:NavigationTool id="navToolbar" map="{map}"/>
+		
+		
+		<esri:VEGeocoder id="veGeocoder" 
+						 key="Aji8Re-EmYI1VdpMOe3roa64pwmu5phdNqclyk7QfJJ6RwZTZJqiCM8Mx13aIC8_" 
+						 culture="en-US"/>
+				
+		<esri:SimpleMarkerSymbol id="circQuerySym" style="circle" color="#FBEF19" alpha="1"/>
+		<esri:SimpleMarkerSymbol id="triQuerySym" style="triangle" color="#FBEF19" alpha="1"/>
+		
+		<esri:SimpleMarkerSymbol id="blackSym"
+								 color="0x3399FF" 
+								 alpha="0" 
+								 size="{(map.level &gt;= 12) ? 24 : (map.level &gt;= 10) ? 20 : 16}" >
+			<esri:SimpleLineSymbol width="5" 
+								   alpha="1"
+								   color="0x3399FF"
+								   style="solid" />
+		</esri:SimpleMarkerSymbol>
+		<esri:SimpleMarkerSymbol id="whiteSym"
+								 color="0x3399FF"
+								 size="{(map.level &gt;= 12) ? 28 : (map.level &gt;= 10) ? 24 : 20}" >
+			<esri:SimpleLineSymbol width="2"
+								   color="white"
+								   style="solid" />
+		</esri:SimpleMarkerSymbol>
+		<esri:SimpleMarkerSymbol id="yellowSym"
+								 color="0x3399FF"
+								 size="{(map.level &gt;= 12) ? 28 : (map.level &gt;= 10) ? 24 : 20}" >
+			<esri:SimpleLineSymbol width="2"
+								   color="yellow"
+								   style="solid" />
+		</esri:SimpleMarkerSymbol>
+		<esri:SimpleMarkerSymbol id="redSym"
+								 color="0x3399FF"
+								 size="{(map.level &gt;= 12) ? 28 : (map.level &gt;= 10) ? 24 : 20}" >
+			<esri:SimpleLineSymbol width="2"
+								   color="red"
+								   style="solid" />
+		</esri:SimpleMarkerSymbol>
+		
+		<esri:SimpleMarkerSymbol id="whiteTriSym"
+								 style="triangle"
+								 color="black"
+								 size="{(map.level &gt;= 12) ? 28 : (map.level &gt;= 10) ? 24 : 20}" >
+			<esri:SimpleLineSymbol width="2"
+								   color="white"
+								   style="solid" />
+		</esri:SimpleMarkerSymbol>
+		<esri:SimpleMarkerSymbol id="yellowTriSym"
+								 style="triangle"
+								 color="black"
+								 size="{(map.level &gt;= 12) ? 28 : (map.level &gt;= 10) ? 24 : 20}" >
+			<esri:SimpleLineSymbol width="2"
+								   color="yellow"
+								   style="solid" />
+		</esri:SimpleMarkerSymbol>
+		<esri:SimpleMarkerSymbol id="redTriSym"
+								 style="triangle"
+								 color="black"
+								 size="{(map.level &gt;= 12) ? 28 : (map.level &gt;= 10) ? 24 : 20}" >
+			<esri:SimpleLineSymbol width="2"
+								   color="red"
+								   style="solid" />
+		</esri:SimpleMarkerSymbol>
+	    
+	    	    
+	    <!-- Info Box Symbol for displaying layer query results -->
+	    	   	
+		
+		<esri:InfoSymbol id="singleGraphicSym" containerStyleName="queryInfoBox" >
+	   		<esri:infoRenderer>
+	   			<fx:Component>
+	   				<mx:VBox styleName="infoBox" width="100%" >		   				
+		   				<fx:Style source="assets/styles/infoSymbolBox.css"/>
+	   					<fx:Script>
+	   						<![CDATA[
+	   							import mx.controls.Alert;
+    							
+    							private function infoClear():void
+	   							{
+	   								parent.parent.visible = false;
+	   							}
+	   							
+	   						]]>
+	   					</fx:Script>
+	   					<mx:HBox width="100%">
+		   					<mx:Label text="{data.title}" color="white" fontWeight="bold" fontSize="12" />
+	   						<mx:HBox width="100%" horizontalGap="0" />
+				   			<mx:Button id="closeButton" styleName="InfoCloseButton" height="18" width="18" click="infoClear()"/>
+			   			</mx:HBox>
+			   			<mx:VBox styleName="poiContain" width="100%" paddingTop="10" paddingBottom="5" paddingLeft="5" paddingRight="5" verticalGap="0">
+			   				<mx:HBox horizontalGap="0">
+				   				<mx:Text text="" fontWeight="bold" />
+				   				<mx:Text text="{data.value}" />
+			   				</mx:HBox>
+			   			</mx:VBox>
+				   	</mx:VBox>
+				</fx:Component>
+	   		</esri:infoRenderer>
+		</esri:InfoSymbol>
+
+		<!-- End Info Box Symbol -->
+
+	</fx:Declarations>
+	
+	
+	<!-- Main Map -->
+	
+	<mx:Canvas id="mapContainer" width="100%" height="100%">
+		
+		<esri:Map id="map" styleName="mapStyle" openHandCursorVisible="false" logoVisible="false" navigationClass="gov.usgs.wim.controls.WiMNavigation" mapClick="onMapClick(event)" updateComplete="getSites(event)">
+			<esri:extent>            
+				<esri:Extent id="init" xmin="-8909536.377230125" ymin="4566234.556676648" xmax="-7735463.622769875" ymax="5232765.443323352">                
+					<esri:SpatialReference wkid="102100"/>            
+				</esri:Extent>        
+			</esri:extent>		
+			<esri:ArcGISTiledMapServiceLayer            
+				visible="{baseLayers.selectedLayer == 0}"            
+				show="baseSwitch(event)"            
+				url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer" />
+			<esri:ArcGISTiledMapServiceLayer            
+				visible="{baseLayers.selectedLayer == 1}"            
+				show="baseSwitch(event)"            
+				url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" />
+			<esri:ArcGISTiledMapServiceLayer    
+				id="labelsMapLayer"
+				visible="{baseLayers.selectedLayer == 1 &amp;&amp; baseLayers.showLabels}"            
+				show="baseSwitch(event)"            
+				url="http://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer" />
+			<esri:ArcGISTiledMapServiceLayer            
+				visible="{baseLayers.selectedLayer == 2}"            
+				show="baseSwitch(event)"            
+				url="http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" />    
+			<esri:ArcGISDynamicMapServiceLayer
+				id="nwsRadar"
+				visible="{nwsRadarToggle.selected}"
+				alpha="0.65"
+				url="{resourceManager.getString('urls', 'nwsRadar')}" >
+				<esri:visibleLayers>                
+					<mx:ArrayCollection>                    
+						<fx:Number>0</fx:Number> 
+					</mx:ArrayCollection>            
+				</esri:visibleLayers>
+			</esri:ArcGISDynamicMapServiceLayer>
+			
+			
+			<esri:ArcGISDynamicMapServiceLayer
+				id="nwsWatchesWarnings"
+				visible="{nwsWatchesWarningsToggle.selected}"
+				alpha="0.65"
+				url="{resourceManager.getString('urls', 'nwsWatchesWarnings')}" >
+				<esri:layerDefinitions>   
+					<fx:Array>     
+						<fx:String><![CDATA[msg_type = 'CFW' OR msg_type = 'FFA' OR msg_type = 'FFW' OR msg_type = 'FLW' OR msg_type = 'FLS']]></fx:String>                  
+					</fx:Array>            
+				</esri:layerDefinitions>
+				<esri:visibleLayers>                
+					<mx:ArrayCollection>                    
+						<fx:Number>0</fx:Number> 
+					</mx:ArrayCollection>            
+				</esri:visibleLayers>
+			</esri:ArcGISDynamicMapServiceLayer>
+			
+				
+			
+			<esri:ArcGISDynamicMapServiceLayer
+				id="reservoirs"
+				visible="{reservoirGraphicsLayer.visible}"
+				alpha="0"
+				url="{resourceManager.getString( 'urls', 'streamgagesReservoirs')}">
+				<esri:visibleLayers>                
+					<mx:ArrayCollection>                    
+						<fx:Number>1</fx:Number> 
+					</mx:ArrayCollection>            
+				</esri:visibleLayers>
+			</esri:ArcGISDynamicMapServiceLayer>
+			
+			<esri:ArcGISDynamicMapServiceLayer
+				id="streamGages"
+				visible="{streamGageGraphicsLayer.visible}"
+				alpha="0"
+				url="{resourceManager.getString( 'urls', 'streamgagesReservoirs')}">
+				<esri:visibleLayers>                
+					<mx:ArrayCollection>                    
+						<fx:Number>0</fx:Number> 
+					</mx:ArrayCollection>            
+				</esri:visibleLayers>
+			</esri:ArcGISDynamicMapServiceLayer>
+			
+			<esri:GraphicsLayer id="reservoirGraphicsLayer"
+								visible="{reservoirsToggle.selected}" 
+								autoMoveGraphicsToTop="true">
+				<esri:renderer>
+					<esri:UniqueValueRenderer field="ResCondition" defaultSymbol="{blackSym}">
+						<esri:UniqueValueInfo symbol="{whiteSym}" value="below90" />
+						<esri:UniqueValueInfo symbol="{yellowSym}" value="above90" />
+						<esri:UniqueValueInfo symbol="{redSym}" value="spill" />
+					</esri:UniqueValueRenderer>
+				</esri:renderer>
+			</esri:GraphicsLayer>
+			<esri:GraphicsLayer id="streamGageGraphicsLayer"
+								visible="{streamGagesToggle.selected}" 
+								autoMoveGraphicsToTop="true">
+				<esri:renderer>
+					<esri:UniqueValueRenderer field="gageCondition" defaultSymbol="{whiteTriSym}">
+						<esri:UniqueValueInfo symbol="{whiteTriSym}" value="normal" />
+						<esri:UniqueValueInfo symbol="{yellowTriSym}" value="nearFlood" />
+						<esri:UniqueValueInfo symbol="{redTriSym}" value="flooding" />
+					</esri:UniqueValueRenderer>
+				</esri:renderer>
+			</esri:GraphicsLayer>
+			
+			<esri:GraphicsLayer id="queryGraphicsLayer" />
+			<esri:GraphicsLayer id="infoGraphicsLayer" />
+			
+		</esri:Map>
+		
+	</mx:Canvas>
+  
+  	
+  	<!-- End Main Map -->
+  	
+	<!-- Controls -->
+	
+	<wimControls:FullScreenButton top="5" right="5" />
+	
+	<wimControls:BaseMapSelector id="baseLayers" top="5" right="65" creationComplete="{baseLayers.selectedLayer = 2;}" />
+	
+	<wimControls:ExtentNavigator targetMap="{map}" mini="true" fullExtent="{init}" targetNavigation="{navToolbar}" id="navigation" styleName="controlBox" top="5" left="5" />
+	
+	<wimControls:CollapsingSearch id="geocoder" 
+							   styleName="controlBoxTrans" 
+							   top="45" 
+							   right="5" 
+							   width="260"
+							   searchHint="{resourceManager.getString('ui.text', 'geocodeSearchHintText')}"
+							   searchButtonText="{resourceManager.getString('ui.text', 'geocodeSearchButtonText')}"
+							   searchFunction="{geoCode}" />
+	
+	<!--<mx:DataGrid id="table" width="100%" height="100%" />-->
+	
+	<!--<fx:Binding source="reservoirs" destination="reservoirsStreamGagesLegend.serviceLayer"/>-->
+	
+	<!-- End Controls -->
+	
+	<!-- Custom legend/layer toggling -->
+	<wimControls:CollapsingBox id="controlLayers" 
+							   top="85" 
+							   right="5"
+							   startCollapsed="true"	
+							   boxTitle="Available Info">
+		<wimControls:contentGroup>
+			<s:VGroup>
+				<mx:TabNavigator id="availableInfo" backgroundColor="black" paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5">
+					<mx:Box label="Available Layers">
+						<s:VGroup
+							width="300">
+							<s:Group width="100%" bottom="20">
+								<s:Rect width="100%" height="100%">
+									<s:fill><s:SolidColor color="black" /></s:fill>
+								</s:Rect>
+								<s:VGroup paddingTop="5" paddingLeft="5" paddingBottom="10">
+									<s:VGroup id="layerToggles" paddingTop="5" paddingLeft="10">
+										<!--<s:Button label="Get Reservoir Summary" color="black" click="getSummaryTables(event)" enabled="{reservoirsToggle.selected}"/>-->
+										<wimControls:LayerToggle id="reservoirsToggle" serviceLayerID="reservoirGraphicsLayer" layerTitle="Reservoirs"	selected="{reservoirGraphicsLayer.visible}" creationComplete="{reservoirsToggle.selected = false}" />
+										<wimControls:LayerToggle id="streamGagesToggle" serviceLayerID="streamGageGraphicsLayer" layerTitle="Selected stream gages" selected="{streamGageGraphicsLayer.visible}" creationComplete="{streamGagesToggle.selected = false}" />
+										<wimControls:LayerToggle id="nwsRadarToggle" serviceLayerID="nwsRadar" layerTitle="National weather service radar" selected="{nwsRadar.visible}" />
+										<wimControls:LayerToggle id="nwsWatchesWarningsToggle" serviceLayerID="nwsWatchesWarnings" layerTitle="Flood watches/warnings" selected="{nwsWatchesWarnings.visible}" />	
+									</s:VGroup>
+								</s:VGroup>	
+							</s:Group>
+						</s:VGroup>
+					</mx:Box>
+					<mx:Box label="Available Tables">
+						<s:VGroup paddingTop="5" paddingLeft="5" paddingBottom="10">
+							<s:Label text="Summary Tables" fontSize="14" fontWeight="bold" />
+							<s:VGroup paddingLeft="10">
+								<s:Label text="Reservoir and Nearest Gage Data" styleName="tableLinks" useHandCursor="true" buttonMode="true" mouseChildren="true" click="getSummaryTables(event, 2)" />
+								<s:Label text="Reservoir Data Only" styleName="tableLinks" useHandCursor="true" buttonMode="true" mouseChildren="false" click="getSummaryTables(event, 0)" />
+								<s:Label text="Nearest Gage Data Only" styleName="tableLinks" useHandCursor="true" buttonMode="true" mouseChildren="false" click="getSummaryTables(event, 1)" />
+							</s:VGroup>
+						</s:VGroup>
+					</mx:Box>
+				</mx:TabNavigator>
+				<s:Label text="Explanation" fontSize="14"/>
+				<mx:VBox id="legendContainer" width="100%" maxHeight="340" verticalGap="0" verticalScrollPolicy="on" >
+					<s:VGroup id="unclippedLegendContainer" width="100%" gap="0">
+						<s:VGroup width="300">
+							<s:Group width="100%" bottom="20">
+								<s:Rect width="100%" height="100%">
+									<s:fill><s:SolidColor color="black" /></s:fill>
+								</s:Rect>
+								<s:VGroup>
+									<s:VGroup paddingTop="5" paddingLeft="5" paddingRight="5" gap="0" width="310">
+										<localControls:MapServiceLegend id="reservoirLegend" map="{map}" serviceLayer="{reservoirs}" legendWidth="300" needsUpdates="false"/>
+										<localControls:MapServiceLegend id="streamGagesLegend" map="{map}" serviceLayer="{streamGages}" legendWidth="300" needsUpdates="false" />
+									</s:VGroup>
+									<s:VGroup paddingLeft="5" paddingRight="5" paddingBottom="5" gap="0" width="300">
+										<localControls:MapServiceLegend id="nwsWatchesWarningsLegend" legendTitle="Flood watches/warnings" map="{map}" needsUpdates="false" serviceLayer="{nwsWatchesWarnings}" legendWidth="300" legendFilter="['Coastal Flood Warning' , 'Flash Flood Watch' , 'Flash Flood Warning' , 'Flood Warning (areal)' , 'Urban and Small Stream Flood Advisory']" />
+									</s:VGroup> 
+								</s:VGroup>
+							</s:Group>
+						</s:VGroup>
+					</s:VGroup>
+				</mx:VBox>
+			</s:VGroup>
+		</wimControls:contentGroup>
+	</wimControls:CollapsingBox>
+	<!-- End Custom legend/layer toggling -->
+	
+	
+	<!-- WiM Logo -->
+	
+	<mx:HBox right="15" bottom="15" backgroundAlpha="0" verticalAlign="bottom">
+		<!--<mx:Image id="wimLogo" source="{resourceManager.getString('ui.graphics', 'wimLogo')}" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="Wisconsin Internet Mapper Group" click="navigateToURL(new URLRequest('http://wi.water.usgs.gov/wim/index.html'))" />-->
+		<mx:Image id="usgsLogo" source="@Embed(source='assets/images/usgsLogoSm.jpg')" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="U.S. Geological Survey" click="navigateToURL(new URLRequest('http://www.usgs.gov'))" />
+		<mx:HBox paddingLeft="2" paddingRight="5" borderColor="black" borderStyle="solid" backgroundColor="white">
+			<mx:Image id="njDepLogo" source="@Embed(source='assets/images/nj_dep_small.jpg')" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="New Jersey Department of Environmental Protection" click="navigateToURL(new URLRequest('http://www.state.nj.us/dep/'))" />
+		</mx:HBox>
+	</mx:HBox>
+    
+	<!-- End WiM Logo -->
+	
+	
+	<!-- Shows Map Scale and Lat Long Box -->
+    <wimControls:CoordsScale map="{map}" alpha="0.6" bottom="10" width="100%" />
+		
+	<!-- Loading Screen -->
+	<wimControls:BasicLoadingScreen id="loadingScreen" visible="false" alpha="0.6" />
+		
+
+	
+</mx:Application>

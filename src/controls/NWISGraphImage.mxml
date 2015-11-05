@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 10.03.11 - NE - Added properties for specifying begin and end date and parameter type for charts. Can also specify presentation quality chart. Added HTTP Service to request presentation quality charts. Service is on epa13. -->
+<!-- 08.31.11 - NE - Added property to control loading screen background color. -->
+<!-- 08.09.11 - JB - Created -->
+<!-- asdoc\NWISGraphImage.mxml -->
+<!--- 
+<p>NWISGraphImage - Creates NWIS Graph Image. Preloads for fast display</p>
+
+<p><strong>Author:</strong> Jon Baier</p>
+<p><em>Copyright USGS 2011</em></p>
+-->
+<s:SkinnableComponent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="controls.skins.NWISGraphImageSkin"
+					  creationComplete="onComplete(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Image;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			
+			
+			/*--------------------------*/
+			/*							
+			/*	Skin Parts				
+			/*							
+			/*--------------------------*/
+						
+			/**
+			 *  The skin part that defines the title area fill		 
+			 */
+			[SkinPart("false")]	
+			public var graph:Image;
+			
+				
+			public static const SEVENDAY:int = 0;
+			public static const FTC:int = 1;
+			public static const PRESENTATION:int = 2;
+			
+			private var _siteNumber:String;
+			[Bindable]
+			public function get siteNumber():String
+			{
+				return _siteNumber;
+			}
+			public function set siteNumber(value:String):void
+			{
+				_siteNumber = value;
+			}
+			
+			private var _chartParam:String;
+			[Bindable]
+			public function get chartParam():String
+			{
+				return _chartParam;
+			}
+			public function set chartParam(value:String):void
+			{
+				_chartParam = value;
+			}
+			
+			private var _beginDate:String;
+			[Bindable]
+			public function get beginDate():String
+			{
+				return _beginDate;
+			}
+			public function set beginDate(value:String):void
+			{
+				_beginDate = value;
+			}
+			
+			private var _endDate:String;
+			[Bindable]
+			public function get endDate():String
+			{
+				return _endDate;
+			}
+			public function set endDate(value:String):void
+			{
+				_endDate = value;
+			}
+			
+			private var _loadingScreenColor:uint;
+			[Bindable]
+			public function get loadingScreenColor():uint
+			{
+				return _loadingScreenColor;
+			}
+			public function set loadingScreenColor(value:uint):void
+			{
+				_loadingScreenColor = value;
+			}
+			
+			private var _presentationURL:String;
+			[Bindable]
+			public function get presentationURL():String
+			{
+				return _presentationURL;
+			}
+			public function set presentationURL(value:String):void
+			{
+				_presentationURL = value;
+			}
+
+			private var _hydrographPast7URL:String = "http://waterwatch.usgs.gov/wwapps/zchart.php?vt=uv";
+			[Bindable]
+			public function get hydrographPast7URL():String
+			{
+				return _hydrographPast7URL;
+			}
+			public function set hydrographPast7URL(value:String):void
+			{
+				_hydrographPast7URL = value;
+			}
+
+			private var _historicFTCURL:String = "http://waterwatch.usgs.gov/wwapps/ftc.php?small=0";
+			[Bindable]
+			public function get historicFTCURL():String
+			{
+				return _historicFTCURL;
+			}
+			public function set historicFTCURL(value:String):void
+			{
+				_historicFTCURL = value;
+			}
+			
+			private var _graphType:int = SEVENDAY;
+			[Bindable]
+			public function get graphType():int
+			{
+				return _graphType;
+			}
+			public function set graphType(value:int):void
+			{
+				_graphType = value;
+			}
+
+			
+			public function getGraphURL():String
+			{
+				switch (graphType){
+					case SEVENDAY: return _hydrographPast7URL; break;
+					case FTC: return _historicFTCURL; break;
+					default: return _hydrographPast7URL; break;
+				}
+			}
+			
+			
+			private var _hydrographPast7Text:String;
+			[Bindable]
+			public function get hydrographPast7Text():String
+			{
+				return _hydrographPast7Text;
+			}
+			public function set hydrographPast7Text(value:String):void
+			{
+				_hydrographPast7Text = value;
+			}
+			
+			
+			private var _historicFTCText:String;
+			[Bindable]
+			public function get historicFTCText():String
+			{
+				return _historicFTCText;
+			}
+			public function set historicFTCText(value:String):void
+			{
+				_historicFTCText = value;
+			}
+
+			public function getGraphText():String
+			{
+				switch (graphType){
+					case SEVENDAY: return _hydrographPast7Text; break;
+					case FTC: return _historicFTCText; break;
+					default: return _hydrographPast7Text; break;
+				}
+			}
+			
+			private var _presentationWidth:Number = 580;
+			[Bindable]
+			public function get presentationWidth():Number
+			{
+				return _presentationWidth;
+			}
+			public function set presentationWidth(value:Number):void
+			{
+				_presentationWidth = value;
+			}
+			
+			private var _presentationHeight:Number = 430;
+			[Bindable]
+			public function get presentationHeight():Number
+			{
+				return _presentationHeight;
+			}
+			
+			public function set presentationHeight(value:Number):void
+			{
+				_presentationHeight = value;
+			}
+			
+			
+			private var _hydrographPast7Width:Number = 576;
+			[Bindable]
+			public function get hydrographPast7Width():Number
+			{
+				return _hydrographPast7Width;
+			}
+			public function set hydrographPast7Width(value:Number):void
+			{
+				_hydrographPast7Width = value;
+			}
+
+			
+			private var _hydrographPast7Height:Number = 384;
+			[Bindable]
+			public function get hydrographPast7Height():Number
+			{
+				return _hydrographPast7Height;
+			}
+
+			public function set hydrographPast7Height(value:Number):void
+			{
+				_hydrographPast7Height = value;
+			}
+			
+
+			private var _historicFTCWidth:Number = 700;
+			[Bindable]
+			public function get historicFTCWidth():Number
+			{
+				return _historicFTCWidth;
+			}
+			public function set historicFTCWidth(value:Number):void
+			{
+				_historicFTCWidth = value;
+			}
+			
+			
+			private var _historicFTCHeight:Number = 500;
+			[Bindable]
+			public function get historicFTCHeight():Number
+			{
+				return _historicFTCHeight;
+			}
+			public function set historicFTCHeight(value:Number):void
+			{
+				_historicFTCHeight = value;
+			}
+			
+			
+			public function getGraphWidth():Number
+			{
+				switch (graphType){
+					case SEVENDAY: return _hydrographPast7Width; break;
+					case FTC: return _historicFTCWidth; break;
+					case PRESENTATION: return _presentationWidth; break;
+					default: return _hydrographPast7Width; break;
+				}
+			}
+			
+			public function getGraphHeight():Number
+			{
+				switch (graphType){
+					case SEVENDAY: return _hydrographPast7Height; break;
+					case FTC: return _historicFTCHeight; break;
+					case PRESENTATION: return _presentationHeight; break;
+					default: return _hydrographPast7Height; break;
+				}
+			}
+			
+			protected function onComplete(event:FlexEvent):void
+			{
+				if (graphType == 2) {
+					var chartRequest:HTTPService = new HTTPService();
+					chartRequest.method = "GET";
+					chartRequest.url = "http://wim.usgs.gov/proxies/nwisChartProxy/Default.aspx?site_no="+siteNumber+"&chart_param="+chartParam+"&previous_x_days=7"; //"http://waterdata.usgs.gov/nwis/uv/?format=img_default&site_no="+siteNo+"&set_arithscale_y=on&begin_date=20110907";
+					chartRequest.addEventListener(ResultEvent.RESULT, chartResult);
+					chartRequest.send();
+				}
+				
+				function chartResult(event:ResultEvent):void {
+					presentationURL = event.result.toString();
+				}
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+</s:SkinnableComponent>

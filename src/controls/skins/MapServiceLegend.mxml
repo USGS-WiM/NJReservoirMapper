@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 08.02.12 - NE - Added creation complete event to be sure legend updates when layer is toggled on. Removed explicit setting for height. -->
+<!-- 02.23.12 - NE - Created -->
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" updateComplete="updateComp()"
+		creationComplete="createComp()">
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("controls.MapServiceLegend")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.utils.WebMercatorUtil;
+			
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			
+			private function createComp():void {
+				if (hostComponent.serviceLayer.url != null) {
+					hostComponent.addEventListener(FlexEvent.CREATION_COMPLETE, hostComponent.getLegends);
+					if (hostComponent.needsUpdates == true) {
+						hostComponent.serviceLayer.addEventListener(FlexEvent.UPDATE_COMPLETE, hostComponent.getLegends);
+					}
+				}
+			}
+									
+			private function updateComp():void {
+				if (hostComponent.serviceLayer.url != null) {
+					hostComponent.aLegend = aLegend;
+					var legendService:HTTPService = new HTTPService();
+					legendService.url = hostComponent.serviceLayer.url + "/legend?f=json";
+					legendService.requestTimeout = 0;
+					legendService.resultFormat = "text";
+					legendService.addEventListener(ResultEvent.RESULT, hostComponent.legendResults);
+					legendService.addEventListener(FaultEvent.FAULT, hostComponent.queryFault);
+					hostComponent.aLegendService = legendService;
+					if (hostComponent.needsUpdates == true) {
+						hostComponent.map.addEventListener(FlexEvent.UPDATE_COMPLETE, hostComponent.getLegends);
+					}
+				} 
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" />
+		<s:State name="selected" />
+		<s:State name="disabled"/>
+	</s:states>
+	
+	<s:BorderContainer id="aLegend" visible="{hostComponent.serviceLayer.visible}" includeInLayout="{hostComponent.serviceLayer.visible}" backgroundColor="#f4f1dd" borderVisible="false" color="black" width="{hostComponent.legendWidth}" >
+		<s:layout>
+			<s:VerticalLayout gap="0" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" />
+		</s:layout>
+	</s:BorderContainer>
+	
+</s:SparkSkin>

@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 02.13.13 - NE - Updated footnotes. -->
+<!-- 01.11.13 - NE - Addition of footnotes below tables. -->
+<!-- 01.07.13 - NE - Added combined table. -->
+<!-- 10.27.12 - NE - Added a streamgage table to SummaryTables.mxml. linked reservoir and streamgage real-time info. linked downstream gages to streamgage table. -->
+<!-- 09.05.12 - NE - Added handling for clicking on the grid to disply highlight for clicked reservoir. -->
+<!-- 08.24.12 - NE - Created. -->
+<wim:WiMInfoWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:esri="http://www.esri.com/2008/ags"
+				   xmlns:osmf="http://ns.adobe.com/osmf"
+				   xmlns:wim="gov.usgs.wim.controls.*" 
+				   xmlns:localControls="controls.*"
+				   title=" Reservoir and Downstream Gage Summary" 
+				   minWidth="400"
+				   width="100%"
+				   height="100%"
+				   creationComplete="onComp()">
+	
+	<fx:Style source="assets/styles/main.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Graphic;
+			
+			import flashx.textLayout.events.UpdateCompleteEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.IList;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			import spark.events.GridEvent;
+			
+			public var streamGageDataGrid:DataGrid;
+			
+			private var downstreamGageIndex:int;
+			
+			private var reservoirCreationComp:Boolean = false;
+			private var streamgageCreationComp:Boolean = false;
+			private var combinedCreationComp:Boolean = false;
+			
+			
+			private function onComp():void {
+				summaries.selectedIndex = FlexGlobals.topLevelApplication.summaryTableIndex;
+				
+				for (var i:int = 0; i < data[0].length; i++) {
+					var gageID:String = data[0][i].DwnStreamGageID;
+					
+					if (gageID != 'N/A') {
+						data[0][i].gageDischarge = getDischarge(gageID);
+						data[0][i].gageCondition = getGageCondition(gageID);
+					} else {
+						data[0][i].gageDischarge = 'n.a.';
+						data[0][i].gageCondition = 'normal';
+					}
+				}
+				
+				for (var i:int = 0; i < data[1].length; i++) {
+					var ResName:String = data[1][i].NearestRes;
+					
+					data[1][i].ResLinkType = getLinkType(ResName);
+					data[1][i].ResID = getResID(ResName);
+					data[1][i].ResCondition = getResCondition(ResName);
+				}
+				
+			}
+			
+			private function getDischarge(gageID:String):String {
+				var gageDischarge:String;
+				
+				for (var i:int = 0; i < data[1].length; i++) {
+					if (data[1][i].GageID == gageID) {
+						if (data[1][i].hasOwnProperty('Discharge') == true) {
+							if (int(data[1][i].Discharge) is Number) {
+								gageDischarge = data[1][i].Discharge;
+							}
+						} else {
+							gageDischarge = 'n.a.';
+						}
+					}
+				}
+				
+				return gageDischarge;
+			}
+			
+			private function getGageCondition(gageID:String):String {
+				var gageCondition:String;
+				
+				for (var i:int = 0; i < data[1].length; i++) {
+					if (data[1][i].GageID == gageID) {
+						if (data[1][i].hasOwnProperty('gageCondition') == true) {
+							gageCondition = data[1][i].gageCondition;
+						} else {
+							data[1][i].gageCondition = 'normal';
+							gageCondition = 'normal';
+						}
+					}
+				}
+				
+				return gageCondition;
+			}
+			
+			private function getLinkType(resName:String):String {
+				var linkType:String;
+				
+				for (var i:int = 0; i < data[0].length; i++) {
+					if (data[0][i].ResName == resName) {
+						linkType = data[0][i].ResLinkType;
+					}
+				}
+				
+				return linkType;
+			}
+			
+			private function getResID(resName:String):String {
+				var ResID:String;
+				
+				for (var i:int = 0; i < data[0].length; i++) {
+					if (data[0][i].ResName == resName) {
+						ResID = data[0][i].ResID;
+					}
+				}
+				
+				return ResID;
+			}
+			
+			private function getResCondition(resName:String):String {
+				var ResCondition:String;
+				
+				for (var i:int = 0; i < data[0].length; i++) {
+					if (data[0][i].ResName == resName) {
+						ResCondition = data[0][i].ResCondition;
+					}
+				}
+				
+				return ResCondition;
+			}
+			
+			private function onDataGridComp():void {
+			
+				//trace('grid completed');
+				
+			}
+		
+			private function gridClick(event:GridEvent):void {
+				
+				//for (var i:int = 0; i < data[0].length; i++) {
+					//trace(data[0][i].ResID + ": " + data[0][i].resLatestVolume);
+				//}
+				
+				if (event.item != null) {
+					if (event.currentTarget.id == "reservoirSummary") {
+						if (event.column.headerText.match('Name of nearest downstream gage') != null) {
+							for (var i:int; i < data[1].length; i++) {
+								if (event.item.DownstreamGage == data[1][i].StreamGageNm) {
+									summaries.selectedIndex = 1;
+									downstreamGageIndex = i;
+									 if (streamgageSummary != null) {
+										streamgageSummary.selectedIndex = downstreamGageIndex;
+										streamgageSummary.validateNow();
+										streamgageSummary.ensureCellIsVisible(downstreamGageIndex);
+										streamgageSummary.removeEventListener("updateComplete", gageSelect);
+									} 
+								}
+							} 
+						} else if (event.column.headerText == 'Name') {
+							if (event.item.ResLinkType == '2') {
+								navigateToURL(new URLRequest('http://www.nyc.gov/html/dep/html/drinking_water/maplevels_wide.shtml'));
+							} else if (event.item.ResLinkType == '1') {
+								navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+event.item.ResID));
+							}
+						}
+						for each (var graphic:Graphic in FlexGlobals.topLevelApplication.reservoirGraphicsLayer.graphicProvider) {
+							if (event.currentTarget.selectedItem != null && graphic.attributes.ResID == event.currentTarget.selectedItem.ResID) {
+								FlexGlobals.topLevelApplication.queryGraphicsLayer.clear();
+								var aGraphic:Graphic = new Graphic();
+								aGraphic.geometry = graphic.geometry;
+								aGraphic.symbol = FlexGlobals.topLevelApplication.circQuerySym;
+								FlexGlobals.topLevelApplication.queryGraphicsLayer.add(aGraphic);
+							}
+						}
+					} else if (event.currentTarget.id == "streamgageSummary") {
+						if (event.column.headerText == "Name of nearest downstream gage" && event.item.GageID != 'Null') {
+							navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+event.item.GageID));
+						} else if (event.column.headerText == 'Reservoir Name') {
+							if (event.item.ResLinkType == '2') {
+								navigateToURL(new URLRequest('http://www.nyc.gov/html/dep/html/drinking_water/maplevels_wide.shtml'));
+							} else if (event.item.ResLinkType == '1') {
+								navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+event.item.ResID));
+							}
+						} 
+						for each (var graphic:Graphic in FlexGlobals.topLevelApplication.streamGageGraphicsLayer.graphicProvider) {
+							if (event.currentTarget.selectedItem != null && graphic.attributes.GageID == event.currentTarget.selectedItem.GageID) {
+								FlexGlobals.topLevelApplication.queryGraphicsLayer.clear();
+								var aGraphic:Graphic = new Graphic();
+								aGraphic.geometry = graphic.geometry;
+								aGraphic.symbol = FlexGlobals.topLevelApplication.circQuerySym;
+								FlexGlobals.topLevelApplication.queryGraphicsLayer.add(aGraphic);
+							}
+						}
+					} else if (event.currentTarget.id == "combinedSummary") {
+						if (event.column.headerText == 'Name') {
+							if (event.item.ResLinkType == '2') {
+								navigateToURL(new URLRequest('http://www.nyc.gov/html/dep/html/drinking_water/maplevels_wide.shtml'));
+							} else if (event.item.ResLinkType == '1') {
+								navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+event.item.ResID));
+							}
+						} else if (event.column.headerText == 'Reservoir manager') {
+							navigateToURL(new URLRequest("http://wdr.water.usgs.gov/wy"+event.item.WaterYear+"/pdfs/"+event.item.ResID+"."+event.item.WaterYear+".pdf"));
+						} else if (event.column.headerText.match("Name of nearest downstream gage") != null && event.item.GageID != 'Null') {
+							navigateToURL(new URLRequest('http://waterdata.usgs.gov/nwis/uv?site_no='+event.item.GageID));
+						}
+					}
+				}
+			}
+			
+			 private function gageSelect(index:int):void {
+				if (streamgageSummary != null && streamgageSummary.dataProvider != null) {
+					streamgageSummary.setFocus();
+					streamgageSummary.validateNow();
+					streamgageSummary.selectedIndex = downstreamGageIndex;
+					streamgageSummary.ensureCellIsVisible(downstreamGageIndex,0); 
+					streamgageSummary.removeEventListener("updateComplete", gageSelect);
+				}
+			}
+			
+			private function gageSelectionInitial(event:FlexEvent):void {
+				if (streamgageSummary != null && streamgageSummary.dataProvider != null) {
+					streamgageSummary.setFocus();
+					streamgageSummary.validateNow();
+					streamgageSummary.selectedIndex = downstreamGageIndex;
+					streamgageSummary.ensureCellIsVisible(downstreamGageIndex,0); 
+					streamgageSummary.removeEventListener("updateComplete", gageSelect);
+				}
+			} 
+			
+		]]>
+	</fx:Script>
+	<mx:Box paddingLeft="5" paddingTop="5" paddingBottom="5" paddingRight="5">
+		<mx:TabNavigator id="summaries" paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" width="{830}" height="{reservoirSummary.height+115}">
+			
+			<mx:Box label="Reservoir Summary">
+				<s:VGroup horizontalAlign="center">
+					<s:Label text="Current conditions for reservoirs and nearest downstream gages" 
+							 textAlign="center" 
+							 width="{reservoirSummary.width}" />
+					<s:Label text="(All real-time values are from U.S. Geological Survey unless otherwise noted; USGS, U.S. Geological Survey; NWIS, the USGS National Water Information System)" 
+							 textAlign="center"
+							 width="{reservoirSummary.width}" />
+				</s:VGroup>
+				<s:HGroup height="100%" width="100%" paddingBottom="0">
+					<s:BorderContainer borderColor="black" borderStyle="solid" borderWeight="1">
+						<s:Label text="Reservoirs" paddingTop="3" textAlign="center"  backgroundColor="0xAAAAAA" width="{reservoirSummary.width-138}" height="100%" />
+					</s:BorderContainer>
+				</s:HGroup>
+				<s:DataGrid id="reservoirSummary" dataProvider="{data[0]}" sortableColumns="false" variableRowHeight="true" height="600" gridClick="gridClick(event)" creationComplete="onDataGridComp()">
+					<s:columns>
+						<s:ArrayList>
+							<s:GridColumn dataField="ResName" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Name" width="120" itemRenderer="assets.itemRenderers.ReservoirNames" />
+							<s:GridColumn dataField="resElevDateTime" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Time of latest update" width="150" />
+							<s:GridColumn dataField="resElevation" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Latest water-surface elevation, in feet" itemRenderer="assets.itemRenderers.LatestSurfElev" width="115" />
+							<s:GridColumn dataField="spill_stage" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Spillway elevation, in feet" width="120" />
+							<s:GridColumn dataField="resLatestCapacity" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Latest volume in percent of capacity (90-99% in yellow, >= 100% in red)" width="100" itemRenderer="assets.itemRenderers.LatestCapacity" />
+							<s:GridColumn dataField="DownstreamGage" 
+										  headerRenderer="assets.headerRenderers.headerTextWrap" 
+										  headerText="Name of nearest downstream gage indicating relative value of stage (less than 1 foot below flood stage in yellow, at or above flood stage in red)" 
+										  width="120" 
+										  itemRenderer="assets.itemRenderers.GageNames" />
+						</s:ArrayList>
+					</s:columns>
+				</s:DataGrid>
+			</mx:Box>
+			
+			<mx:Box label="Downstream gage summary">
+				<s:VGroup horizontalAlign="center">
+					<s:Label text="Current conditions for reservoirs and nearest downstream gages" 
+							 textAlign="center" 
+							 width="{streamgageSummary.width}" />
+					<s:Label text="(All real-time values are from U.S. Geological Survey unless otherwise noted; USGS, U.S. Geological Survey; NWIS, the USGS National Water Information System)" 
+							 textAlign="center"
+							 width="{streamgageSummary.width}" />
+				</s:VGroup>
+				<s:HGroup height="100%" width="{streamgageSummary.width}" horizontalAlign="right" paddingBottom="0" gap="0">
+					<s:BorderContainer borderColor="black" borderStyle="solid" borderWeight="1">
+						<s:Label text="Nearest downstream U.S. Geological Survey stream gage" paddingTop="3" textAlign="center" backgroundColor="0xAAAAAA" width="497" height="100%" />
+					</s:BorderContainer>
+				</s:HGroup>
+				<s:DataGrid id="streamgageSummary" dataProvider="{data[1]}" height="590" sortableColumns="false" variableRowHeight="true" gridClick="gridClick(event)" updateComplete="gageSelectionInitial(event)" creationComplete="onDataGridComp()">
+					<s:columns>
+						<s:ArrayList>
+							<s:GridColumn dataField="NearestRes" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Reservoir Name" width="130" itemRenderer="assets.itemRenderers.ReservoirNames" />
+							<s:GridColumn dataField="StreamGageNm" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Name of nearest downstream gage" width="120" itemRenderer="assets.itemRenderers.GageNames"/>
+							<s:GridColumn dataField="gageGhDateTime" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Time of latest Update" width="150" />
+							<s:GridColumn dataField="gageGageHeight" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Latest real-time stage, in feet (less than 1 foot below flood stage in yellow, at or above flood stage in red)" width="115" itemRenderer="assets.itemRenderers.GageHeight" />
+							<s:GridColumn dataField="FloodStage" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Flood stage, in feet" width="100" itemRenderer="assets.itemRenderers.FloodStage" />
+						</s:ArrayList>
+					</s:columns>
+				</s:DataGrid>
+			</mx:Box>
+			
+			<mx:Box label="Combined summary">
+				<s:VGroup horizontalAlign="center">
+					<s:Label text="Current conditions for reservoirs and nearest downstream gages" 
+							 textAlign="center" 
+							 width="{streamgageSummary.width}" />
+					<s:Label text="(All real-time values are from U.S. Geological Survey unless otherwise noted; USGS, U.S. Geological Survey; NWIS, the USGS National Water Information System)" 
+							 textAlign="center"
+							 width="{streamgageSummary.width}" />
+				</s:VGroup>
+				<s:HGroup height="100%" width="100%" horizontalAlign="center" paddingBottom="0">
+					<s:BorderContainer borderColor="black" borderStyle="solid" borderWeight="1">
+						<s:Label text="Reservoirs" paddingTop="3" textAlign="center" backgroundColor="0xAAAAAA" width="{combinedSummary.width-820}" height="100%" />
+					</s:BorderContainer>
+					<s:BorderContainer borderColor="black" borderStyle="solid" borderWeight="1">
+						<s:Label text="Nearest downstream U.S. Geological Survey stream gage" paddingTop="3" textAlign="center" backgroundColor="0xAAAAAA" width="810" height="100%" />
+					</s:BorderContainer>
+				</s:HGroup>
+				<s:DataGrid id="combinedSummary" height="580" dataProvider="{data[0]}" sortableColumns="false" variableRowHeight="true" gridClick="gridClick(event)" creationComplete="onDataGridComp()">
+					<s:columns>
+						<s:ArrayList id="combinedColumns">
+							<s:GridColumn dataField="ResName" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Name" width="130" itemRenderer="assets.itemRenderers.ReservoirNames" />
+							<s:GridColumn dataField="Res_Mngr" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Reservoir manager" width="100" itemRenderer="assets.itemRenderers.GageNames" />
+							<s:GridColumn dataField="DrnArMi2" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Drainage area, in square miles" width="80" itemRenderer="assets.itemRenderers.DrnAr" />
+							<s:GridColumn dataField="resElevDateTime" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Time of latest update" width="150" />
+							<s:GridColumn dataField="resElevation" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Latest water-surface elevation, in feet" itemRenderer="assets.itemRenderers.LatestSurfElev" width="80" />
+							<s:GridColumn dataField="spill_stage" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Spillway elevation, in feet" width="80" />
+							<s:GridColumn dataField="resLatestVolume" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Latest volume, in million gallons" width="100" itemRenderer="assets.itemRenderers.LatestVolume" />
+							<s:GridColumn dataField="resLatestCapacity" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Latest volume in percent of capacity (90-99% in yellow, >= 100% in red)" width="100" itemRenderer="assets.itemRenderers.LatestCapacity" />
+							<s:GridColumn dataField="MaxStg_ft_" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Maximum water-surface elevation, in feet" width="100" itemRenderer="assets.itemRenderers.MaxStage" />
+							<s:GridColumn dataField="MaxVol_milGal_" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Maximum volume, in million gallons" width="100" itemRenderer="assets.itemRenderers.MaxVol" />
+							<s:GridColumn dataField="PdOfRec_m_y" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Period of record for maximum reservoir stage and Volume (month/year)" width="150" itemRenderer="assets.itemRenderers.POR" />
+							<s:GridColumn id="firstGageColumn" dataField="StreamGageNm" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Name of nearest downstream gage" width="120" itemRenderer="assets.itemRenderers.GageNames"/>
+							<s:GridColumn dataField="GageDrnAr" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Drainage area, in square miles" width="80" itemRenderer="assets.itemRenderers.DrnAr" />
+							<s:GridColumn dataField="Dist_dwnStrm_mi" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Distance downstream from reservoir, in miles" width="115" />
+							<s:GridColumn dataField="gageGhDateTime" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Time of latest update" width="150" />
+							<s:GridColumn dataField="gageGageHeight" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Latest real-time stage, in feet (less than 1 foot below flood stage in yellow, at or above flood stage in red)" width="115" itemRenderer="assets.itemRenderers.GageHeight" />
+							<s:GridColumn dataField="FloodStage" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Flood stage, in feet" width="100" itemRenderer="assets.itemRenderers.FloodStage" />
+							<s:GridColumn dataField="gageDischarge" headerRenderer="assets.headerRenderers.headerTextWrap" headerText="Streamflow at latest stage, in cubic feet per second" width="120" />
+						</s:ArrayList>
+					</s:columns>
+				</s:DataGrid>
+			</mx:Box>
+			<!-- Footnotes -->
+			<mx:Box label="Footnotes">
+				<s:VGroup>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">1</s:span>
+						<s:span>Name of reservoir with link to USGS NWIS web page with real-time conditions if available.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">2</s:span>
+						<s:span>Reservoir manager with link to USGS annual report containing summary of reservoir surface-water records.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">3</s:span>
+						<s:span>Name of stream gage with link to USGS NWIS web page with real-time conditions.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">4</s:span>
+						<s:span>Values are from reservoir manager.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">5</s:span>
+						<s:span>Values are total volume or percent of total capacity unless otherwise indicated.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">6</s:span>
+						<s:span>Values are usable volume or percent of usable capacity.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">7</s:span>
+						<s:span>Maximum recorded stage during period of record.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">8</s:span>
+						<s:span>Volume at maximum recorded stage during period of record.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">9</s:span>
+						<s:span>Period of record of maximum recorded water-surface elevation and period of record is continuous otherwise indicated.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">10</s:span>
+						<s:span>Period of record includes periods of missing data.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">11</s:span>
+						<s:span>Values are from National Weather Service.</s:span>
+					</s:RichText>
+					<s:RichText>
+						<s:span baselineShift="superscript" fontSize="12">12</s:span>
+						<s:span>Values are from USGS unless otherwise indicated.</s:span>
+					</s:RichText>
+				</s:VGroup>
+			</mx:Box>
+		</mx:TabNavigator>
+		
+		
+		
+	</mx:Box>
+	
+	
+</wim:WiMInfoWindow>
