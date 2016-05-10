@@ -14,7 +14,7 @@
   <!--  URLs -->
   <resourceBundle name="urls">
 	 <resource name="nwsRadar" value="http://gis.srh.noaa.gov/ArcGIS/rest/services/RIDGERadar/MapServer"/>
-	 <resource name="nwsWatchesWarnings" value="http://gis.srh.noaa.gov/ArcGIS/rest/services/watchWarn/MapServer"/>
+	 <resource name="nwsWatchesWarnings" value="http://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer"/>
 	 <resource name="streamgagesReservoirs" value="http://50.17.205.92/arcgis/rest/services/NJMapper/reservoirs_downstream_gages/MapServer" />
   </resourceBundle>
   
