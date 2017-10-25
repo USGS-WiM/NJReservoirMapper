@@ -1,0 +1,44 @@
+[
+  {
+    "name": "NJReservoirMapper",
+    "organization": "U.S. Geological Survey",
+    "description": "The New Jersey Reservoir Mapper provides a snapshot of most recent available water-level data for 25 gaged reservoirs in New Jersey.",
+    "version": "v1.0",
+    "status": "Production",
+    "permissions": {
+      "usageType": "openSource",
+      "licenses": [
+        {
+          "name": "Public Domain, CC0-1.0",
+          "URL": "https://github.com/usgs-wim/NJReservoirMapper/blob/master/LICENSE.md"
+        }
+      ]
+    },
+
+    "homepageURL": "https://ccviewer.wim.usgs.gov/NJReservoirMapper",
+    "downloadURL": "https://github.com/USGS-WiM/NJReservoirMapper/archive/master.zip",
+    "disclaimerURL": "https://github.com/USGS-WiM/NJReservoirMapper/blob/master/LICENSE.md",
+    "repositoryUrl": "https://github.com/USGS-WiM/NJReservoirMapper",
+    "vcs": "git",
+
+    "laborHours": null,
+
+    "tags": [
+      "reservoir",
+      "usgs"
+    ],
+
+    "languages": [
+      "Actionscript"
+    ],
+
+    "contact": {
+      "name": "Nicholas Estes",
+      "email": "njestes@usgs.gov"
+    },
+
+    "date": {
+      "metadataLastUpdated": "2017-10-25"
+    }
+  }
+]
