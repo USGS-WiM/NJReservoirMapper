@@ -17,7 +17,7 @@
 
     "homepageURL": "https://ccviewer.wim.usgs.gov/NJReservoirMapper",
     "downloadURL": "https://github.com/USGS-WiM/NJReservoirMapper/archive/master.zip",
-    "disclaimerURL": "https://github.com/USGS-WiM/NJReservoirMapper/blob/master/LICENSE.md",
+    "disclaimerURL": "https://github.com/USGS-WiM/NJReservoirMapper/blob/master/DISCLAIMER.md",
     "repositoryUrl": "https://github.com/USGS-WiM/NJReservoirMapper",
     "vcs": "git",
 
